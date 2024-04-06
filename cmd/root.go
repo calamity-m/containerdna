@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/calamity-m/paternity/pkg/config"
+	"github.com/calamity-m/paternity/pkg/version"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"os"
@@ -16,12 +17,10 @@ var cfg string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "paternity",
-	Short: "App for testing if a container image is built from a parent image",
-	Long:  ``,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("root")
-	},
+	Use:     "paternity",
+	Short:   "App for testing if a container image is built from a parent image",
+	Long:    ``,
+	Version: version.GetVersionS(),
 }
 
 var configuration *config.Config
@@ -52,6 +51,9 @@ func initialize() {
 
 	// Set zerolog
 	initLog()
+
+	// Log some default information
+	log.Debug().Msgf("Config file used: %s", viper.ConfigFileUsed())
 }
 
 func initConfig() {
@@ -84,22 +86,10 @@ func initConfig() {
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		if viper.GetString("log.level") == zerolog.LevelDebugValue {
-			_, err := fmt.Fprintln(os.Stderr, "Debug: Using config file:", viper.ConfigFileUsed())
-			if err != nil {
-				return
-			}
-		}
-	} else {
+	if err := viper.ReadInConfig(); err != nil {
 		err = viper.SafeWriteConfig()
 		if err != nil {
-			if viper.Get("log.level") == zerolog.DebugLevel {
-				_, err := fmt.Fprintln(os.Stderr, "Failed to write initial config file to", cfgDir, "/paternity.yaml")
-				if err != nil {
-					return
-				}
-			}
+			_, _ = fmt.Fprintln(os.Stderr, "Failed to write initial config file to", cfgDir, "/paternity.yaml")
 			return
 		}
 	}
@@ -126,4 +116,6 @@ func initLog() {
 	}
 
 	log.Debug().Msg("Initialized logging")
+	log.Debug().Msgf("Logging level: %s", configuration.Log.Level)
+	log.Debug().Msgf("Logging structured: %t", configuration.Log.Structured)
 }
