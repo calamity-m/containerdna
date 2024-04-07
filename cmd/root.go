@@ -2,10 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/calamity-m/paternity/pkg/config"
-	"github.com/calamity-m/paternity/pkg/version"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
+	"github.com/calamity-m/containerdna/pkg/config"
+	"github.com/calamity-m/containerdna/pkg/version"
+	"github.com/sirupsen/logrus"
 	"os"
 	"strings"
 
@@ -17,9 +16,9 @@ var cfg string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:     "paternity",
-	Short:   "App for testing if a container image is built from a parent image",
-	Long:    ``,
+	Use:     "containerdna",
+	Short:   "Simple CLI for testing container heritage",
+	Long:    `Compares container layer blocks to assert ancestry of containers`,
 	Version: version.GetVersionS(),
 }
 
@@ -42,23 +41,23 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfg,
 		"config",
 		"",
-		"config file (default is $HOME/.config/paternity.yaml)")
+		"config file (default is $HOME/.config/containerdna.yaml)")
 }
 
 func initialize() {
 	// Setup viper
 	initConfig()
 
-	// Set zerolog
+	// Set logging
 	initLog()
 
 	// Log some default information
-	log.Debug().Msgf("Config file used: %s", viper.ConfigFileUsed())
+	logrus.Debugf("Config file used: %s", viper.ConfigFileUsed())
 }
 
 func initConfig() {
 
-	viper.SetDefault("log.level", zerolog.LevelInfoValue)
+	viper.SetDefault("log.level", logrus.InfoLevel)
 	viper.SetDefault("log.file", "")
 	viper.SetDefault("log.structured", false)
 
@@ -73,10 +72,10 @@ func initConfig() {
 		cfgDir, err = os.UserConfigDir()
 		cobra.CheckErr(err)
 
-		// Search config in home directory with name ".paternity" (without extension).
+		// Search config in home directory with name ".containerdna" (without extension).
 		viper.AddConfigPath(cfgDir)
 		viper.SetConfigType("yaml")
-		viper.SetConfigName("paternity")
+		viper.SetConfigName("containerdna")
 	}
 
 	// Prepend PATERNITY to all env vars
@@ -89,7 +88,7 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err != nil {
 		err = viper.SafeWriteConfig()
 		if err != nil {
-			_, _ = fmt.Fprintln(os.Stderr, "Failed to write initial config file to", cfgDir, "/paternity.yaml")
+			_, _ = fmt.Fprintln(os.Stderr, "Failed to write initial config file to", cfgDir, "/containerdna.yaml")
 			return
 		}
 	}
@@ -103,19 +102,27 @@ func initLog() {
 		return
 	}
 
-	// Initialize log level
-	level, err := zerolog.ParseLevel(configuration.Log.Level)
+	// Initalize logrus log level
+	lvl, err := logrus.ParseLevel(configuration.Log.Level)
 	if err != nil {
-		return
-	}
-	zerolog.SetGlobalLevel(level)
-
-	// Initialize log format
-	if !configuration.Log.Structured {
-		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+		logrus.SetLevel(logrus.DebugLevel)
+		logrus.Debug("Failed to parse log level, defaulting to debug")
+	} else {
+		logrus.SetLevel(lvl)
 	}
 
-	log.Debug().Msg("Initialized logging")
-	log.Debug().Msgf("Logging level: %s", configuration.Log.Level)
-	log.Debug().Msgf("Logging structured: %t", configuration.Log.Structured)
+	// Initialize log structure
+	if configuration.Log.Structured {
+		logrus.SetFormatter(&logrus.JSONFormatter{})
+	}
+
+	// Initialize log file
+	if configuration.Log.File != "" {
+		var file, err = os.OpenFile(configuration.Log.File, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			logrus.Error("Failed to open log file, defaulting to stderr")
+		} else {
+			logrus.SetOutput(file)
+		}
+	}
 }
