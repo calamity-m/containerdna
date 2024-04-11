@@ -22,6 +22,11 @@ var rootCmd = &cobra.Command{
 	Version: version.GetVersionS(),
 }
 
+var heritageGroup = &cobra.Group{
+	ID:    "heritage",
+	Title: "Heritage",
+}
+
 var configuration *config.Config
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -34,6 +39,9 @@ func Execute() {
 }
 
 func init() {
+	// Set up groups
+	rootCmd.AddGroup(heritageGroup)
+
 	// On startup of Execute run initConfig
 	cobra.OnInitialize(initialize)
 
