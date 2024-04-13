@@ -2,11 +2,12 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"strings"
+
 	"github.com/calamity-m/containerdna/pkg/config"
 	"github.com/calamity-m/containerdna/pkg/version"
 	"github.com/sirupsen/logrus"
-	"os"
-	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -22,9 +23,9 @@ var rootCmd = &cobra.Command{
 	Version: version.GetVersionS(),
 }
 
-var heritageGroup = &cobra.Group{
-	ID:    "heritage",
-	Title: "Heritage",
+var containerGroup = &cobra.Group{
+	ID:    "Container",
+	Title: "Container",
 }
 
 var configuration *config.Config
@@ -40,7 +41,7 @@ func Execute() {
 
 func init() {
 	// Set up groups
-	rootCmd.AddGroup(heritageGroup)
+	rootCmd.AddGroup(containerGroup)
 
 	// On startup of Execute run initConfig
 	cobra.OnInitialize(initialize)

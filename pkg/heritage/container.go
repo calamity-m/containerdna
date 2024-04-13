@@ -3,6 +3,7 @@ package heritage
 import (
 	"context"
 	"fmt"
+
 	"github.com/containers/image/v5/transports/alltransports"
 	"github.com/containers/image/v5/types"
 	"github.com/sirupsen/logrus"
