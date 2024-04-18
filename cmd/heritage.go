@@ -64,32 +64,44 @@ Usage:
 				fmt.Printf("Please provide child and parent\\s\n")
 			}
 
-			childRef, err := heritage.GetImageReference(Child)
+			// heritage.Playground()
+			//heritage.ValidateWithChannelsNoWg(false, "docker://alpine", "docker://nginx", "docker://ubuntu", "docker://alpine")
+			valid, err := heritage.GetImageAsyncChannels(false, "docker://alpine", "docker://nginxasdfasdf", "adocker://ubuntu", "docker://alpine")
 			if err != nil {
+				fmt.Println("Encountered errors while attempting to evaluate heritage. Errors are:")
+				fmt.Println(err)
 				os.Exit(1)
+			} else {
+				fmt.Printf("Validity: %t", valid)
 			}
-			// This should be in a goroutine
-			childLayers, err := heritage.GetImageLayers(childRef)
-			if err != nil {
-				os.Exit(1)
-			}
+			/*
+				childRef, err := heritage.GetImageReference(Child)
+				if err != nil {
+					os.Exit(1)
+				}
+				// This should be in a goroutine
+				childLayers, err := heritage.GetImageLayers(childRef)
+				if err != nil {
+					os.Exit(1)
+				}
 
-			parentRef, err := heritage.GetImageReference(Parents[0])
-			if err != nil {
-				os.Exit(1)
-			}
-			// This should be in a goroutine
-			parentLayers, err := heritage.GetImageLayers(parentRef)
-			if err != nil {
-				os.Exit(1)
-			}
+				parentRef, err := heritage.GetImageReference(Parents[0])
+				if err != nil {
+					os.Exit(1)
+				}
+				// This should be in a goroutine
+				parentLayers, err := heritage.GetImageLayers(parentRef)
+				if err != nil {
+					os.Exit(1)
+				}
 
-			v := heritage.ValidateChildParents(childLayers, parentLayers)
+				// v := heritage.ValidateChildParents(childLayers, parentLayers)
 
-			fmt.Printf("Valid Child: %v\n", v)
-			if !v {
-				os.Exit(1)
-			}
+				fmt.Printf("Valid Child: %v\n", v)
+				if !v {
+					os.Exit(1)
+				}
+			*/
 
 		},
 	}
