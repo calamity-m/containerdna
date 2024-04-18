@@ -27,9 +27,11 @@ func GetImageLayers(ref types.ImageReference) ([]types.BlobInfo, error) {
 
 	img, err := ref.NewImage(ctx, nil)
 	defer func(img types.ImageCloser) {
-		err := img.Close()
-		if err != nil {
-			panic(err)
+		if img != nil {
+			err := img.Close()
+			if err != nil {
+				panic(err)
+			}
 		}
 	}(img)
 
