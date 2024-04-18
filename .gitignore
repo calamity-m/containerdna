@@ -1,3 +1,5 @@
 .idea/
 bin/
 .fleet/
+.vscode/
+.svg
