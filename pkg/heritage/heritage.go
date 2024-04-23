@@ -90,16 +90,16 @@ func validateChildParentsImage(strict bool, child containers.Image, parents ...c
 		}
 	}
 
-	flip := false
+	tracker := false
 	for _, val := range state {
 		if !strict && val {
 			return true
 		} else if val {
-			flip = true
+			tracker = true
 		} else {
-			flip = false
+			tracker = false
 		}
 	}
 
-	return flip
+	return tracker
 }
