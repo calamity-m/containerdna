@@ -66,7 +66,7 @@ Usage:
 
 			// heritage.Playground()
 			//heritage.ValidateWithChannelsNoWg(false, "docker://alpine", "docker://nginx", "docker://ubuntu", "docker://alpine")
-			valid, err := heritage.GetImageAsyncChannels(false, "docker://alpine", "docker://nginxasdfasdf", "adocker://ubuntu", "docker://alpine")
+			valid, err := heritage.ValidateHeritage(false, "docker://alpine", "docker://nginxasdfasdf", "adocker://ubuntu", "docker://alpine")
 			if err != nil {
 				fmt.Println("Encountered errors while attempting to evaluate heritage. Errors are:")
 				fmt.Println(err)
