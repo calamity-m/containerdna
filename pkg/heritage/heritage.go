@@ -55,11 +55,11 @@ func ValidateHeritage(strict bool, child string, parents ...string) (bool, error
 		return false, errors.Join(errs...)
 	}
 
-	return ValidateChildParentsImage(childImg, parentImgs...), nil
+	return validateChildParentsImage(childImg, parentImgs...), nil
 
 }
 
-func ValidateChildParentsImage(child containers.Image, parents ...containers.Image) bool {
+func validateChildParentsImage(child containers.Image, parents ...containers.Image) bool {
 	parentsMap := map[int]containers.Image{}
 	for i, kv := range parents {
 		if len(kv.Layers) > len(child.Layers) {
