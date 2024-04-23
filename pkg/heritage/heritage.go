@@ -55,14 +55,14 @@ func ValidateHeritage(strict bool, child string, parents ...string) (bool, error
 		return false, errors.Join(errs...)
 	}
 
-	return validateChildParentsImage(childImg, parentImgs...), nil
+	return validateChildParentsImage(strict, childImg, parentImgs...), nil
 
 }
 
-func validateChildParentsImage(child containers.Image, parents ...containers.Image) bool {
+func validateChildParentsImage(strict bool, child containers.Image, parents ...containers.Image) bool {
 	parentsMap := map[int]containers.Image{}
 	for i, kv := range parents {
-		if len(kv.Layers) > len(child.Layers) {
+		if strict && (len(kv.Layers) > len(child.Layers)) {
 			// We cannot have a parent with a larger number of layers than childred
 			logrus.Debugf("%s has more layers than child %s", kv.Name, child.Name)
 			return false
@@ -90,11 +90,16 @@ func validateChildParentsImage(child containers.Image, parents ...containers.Ima
 		}
 	}
 
-	for _, v := range state {
-		if !v {
-			return false
+	flip := false
+	for _, val := range state {
+		if !strict && val {
+			return true
+		} else if val {
+			flip = true
+		} else {
+			flip = false
 		}
 	}
 
-	return true
+	return flip
 }

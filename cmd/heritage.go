@@ -64,9 +64,10 @@ Usage:
 				fmt.Printf("Please provide child and parent\\s\n")
 			}
 
-			// heritage.Playground()
+			// Strict check is the inversion of relaxed
+			strict := !Relaxed
 
-			valid, err := heritage.ValidateHeritage(Relaxed, Child, Parents...)
+			valid, err := heritage.ValidateHeritage(strict, Child, Parents...)
 
 			//valid, err := heritage.ValidateHeritage(false, "docker://alpine", "docker://nginxasdfasdf", "adocker://ubuntu", "docker://alpine")
 			if err != nil {
