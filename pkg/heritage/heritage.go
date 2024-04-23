@@ -3,36 +3,14 @@ package heritage
 import (
 	"errors"
 
-	"github.com/containers/image/v5/types"
+	"github.com/calamity-m/containerdna/pkg/containers"
 	"github.com/sirupsen/logrus"
 )
 
-type Image struct {
-	Layers []types.BlobInfo
-	Name   string
-	Err    error
-}
-
-func GetImage(image string) (*Image, error) {
-
-	imageRef, err := GetImageReference(image)
-	if err != nil {
-		// idk
-		return &Image{Err: err}, err
-	}
-
-	layers, err := GetImageLayers(imageRef)
-	if err != nil {
-		return &Image{Err: err}, err
-	}
-
-	return &Image{Layers: layers, Name: image}, nil
-}
-
 func ValidateHeritage(strict bool, child string, parents ...string) (bool, error) {
 
-	childCh := make(chan Image)
-	parentsCh := make(chan Image, len(parents))
+	childCh := make(chan containers.Image)
+	parentsCh := make(chan containers.Image, len(parents))
 
 	// These channels can close at the end of our function call
 	defer close(childCh)
@@ -40,34 +18,39 @@ func ValidateHeritage(strict bool, child string, parents ...string) (bool, error
 
 	// Get child
 	go func() {
-		img, _ := GetImage(child)
+		img, _ := containers.GetImage(child)
 		childCh <- *img
 	}()
 
 	// Get Parents
 	for _, parent := range parents {
 		go func() {
-			img, _ := GetImage(parent)
+			img, _ := containers.GetImage(parent)
 			parentsCh <- *img
 		}()
 	}
 
-	childImg := <-childCh
-	parentImgs := make([]Image, 0, len(parents))
 	errs := make([]error, 0)
 
+	// Wait on our child and grab it.
+	childImg := <-childCh
+	if childImg.Err != nil {
+		logrus.Debugf("Enountered error while fetching child layers: %v", childImg.Err)
+		errs = append(errs, childImg.Err)
+	}
+
+	// Grab our parents, until we have a total of len(parents) parents.
+	parentImgs := make([]containers.Image, 0, len(parents))
 	for i := 0; i < len(parents); i++ {
 		img := <-parentsCh
 		if img.Err != nil {
+			logrus.Debugf("Enountered error while fetching parent layers: %v", img.Err)
 			errs = append(errs, img.Err)
 		}
 		parentImgs = append(parentImgs, img)
 	}
 
-	if childImg.Err != nil {
-		errs = append(errs, childImg.Err)
-	}
-
+	// Fail if we have any errors
 	if len(errs) != 0 {
 		return false, errors.Join(errs...)
 	}
@@ -76,8 +59,8 @@ func ValidateHeritage(strict bool, child string, parents ...string) (bool, error
 
 }
 
-func ValidateChildParentsImage(child Image, parents ...Image) bool {
-	parentsMap := map[int]Image{}
+func ValidateChildParentsImage(child containers.Image, parents ...containers.Image) bool {
+	parentsMap := map[int]containers.Image{}
 	for i, kv := range parents {
 		if len(kv.Layers) > len(child.Layers) {
 			// We cannot have a parent with a larger number of layers than childred

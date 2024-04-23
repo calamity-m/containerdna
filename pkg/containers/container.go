@@ -1,4 +1,4 @@
-package heritage
+package containers
 
 import (
 	"context"
@@ -8,6 +8,28 @@ import (
 	"github.com/containers/image/v5/types"
 	"github.com/sirupsen/logrus"
 )
+
+type Image struct {
+	Layers []types.BlobInfo
+	Name   string
+	Err    error
+}
+
+func GetImage(image string) (*Image, error) {
+
+	imageRef, err := GetImageReference(image)
+	if err != nil {
+		// idk
+		return &Image{Err: err}, err
+	}
+
+	layers, err := GetImageLayers(imageRef)
+	if err != nil {
+		return &Image{Err: err}, err
+	}
+
+	return &Image{Layers: layers, Name: image}, nil
+}
 
 func GetImageReference(name string) (types.ImageReference, error) {
 	// docker-daemon:test:test
