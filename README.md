@@ -2,7 +2,7 @@
 
 this is wip im learning leave me alone :)
 
-Basic tool for viewing and validating things about a container's history
+Basic catch all tool for viewing and validating things about a container's history
 
 ## Prerequisites
 
