@@ -90,6 +90,7 @@ func validateChildParentsImage(relaxed bool, child containers.Image, parents ...
 		}
 	}
 
+	// Look, I won't lie there is a better way to do this my but my brain was fried and I am nothin' but lazy.
 	tracker := false
 	for _, val := range state {
 		if relaxed && val {
