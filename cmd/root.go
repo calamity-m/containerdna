@@ -20,7 +20,7 @@ var rootCmd = &cobra.Command{
 	Use:     "containerdna",
 	Short:   "Simple CLI for testing container heritage",
 	Long:    `Compares container layer blocks to assert ancestry of containers`,
-	Version: version.GetVersionS(),
+	Version: version.GetVersion().String(),
 }
 
 var containerGroup = &cobra.Group{

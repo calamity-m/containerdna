@@ -13,6 +13,10 @@ type Version struct {
 	Dependencies  []*debug.Module
 }
 
+func (v Version) String() string {
+	return fmt.Sprintf("module: %s, go: %s, git: %s", v.ModuleVersion, v.GoVersion, v.GitCommit)
+}
+
 func GetVersion() *Version {
 
 	v := &Version{ModuleVersion: "unknown", CommitTime: "unknown", GitCommit: "unknown", GoVersion: "unknown"}
@@ -41,9 +45,4 @@ func GetVersion() *Version {
 	}
 
 	return v
-}
-
-func GetVersionS() string {
-	v := GetVersion()
-	return fmt.Sprintf("module: %s, go: %s, git: %s", v.ModuleVersion, v.GoVersion, v.GitCommit)
 }
