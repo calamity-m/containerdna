@@ -7,7 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func ValidateHeritage(strict bool, child string, parents ...string) (bool, error) {
+func ValidateHeritage(relaxed bool, child string, parents ...string) (bool, error) {
 
 	childCh := make(chan containers.Image)
 	parentsCh := make(chan containers.Image, len(parents))
@@ -55,15 +55,15 @@ func ValidateHeritage(strict bool, child string, parents ...string) (bool, error
 		return false, errors.Join(errs...)
 	}
 
-	return validateChildParentsImage(strict, childImg, parentImgs...), nil
+	return validateChildParentsImage(relaxed, childImg, parentImgs...), nil
 
 }
 
-func validateChildParentsImage(strict bool, child containers.Image, parents ...containers.Image) bool {
+func validateChildParentsImage(relaxed bool, child containers.Image, parents ...containers.Image) bool {
 	parentsMap := map[int]containers.Image{}
 	for i, kv := range parents {
-		if strict && (len(kv.Layers) > len(child.Layers)) {
-			// We cannot have a parent with a larger number of layers than childred
+		if !relaxed && (len(kv.Layers) > len(child.Layers)) {
+			// If our parent has more layers than child we can exist early
 			logrus.Debugf("%s has more layers than child %s", kv.Name, child.Name)
 			return false
 		}
@@ -92,7 +92,7 @@ func validateChildParentsImage(strict bool, child containers.Image, parents ...c
 
 	tracker := false
 	for _, val := range state {
-		if !strict && val {
+		if relaxed && val {
 			return true
 		} else if val {
 			tracker = true
