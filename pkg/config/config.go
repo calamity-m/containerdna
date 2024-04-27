@@ -3,7 +3,7 @@ package config
 import "github.com/spf13/viper"
 
 type Config struct {
-	Log Log `json:"log,omitempty"`
+	Log Log
 }
 
 type Log struct {
