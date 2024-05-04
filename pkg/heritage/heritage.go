@@ -60,6 +60,10 @@ func ValidateHeritage(relaxed bool, child string, parents ...string) (bool, erro
 }
 
 func validateChildParentsImage(relaxed bool, child containers.Image, parents ...containers.Image) bool {
+	if len(child.Layers) == 0 {
+		return false
+	}
+
 	parentsMap := map[int]containers.Image{}
 	for i, kv := range parents {
 		if !relaxed && (len(kv.Layers) > len(child.Layers)) {
