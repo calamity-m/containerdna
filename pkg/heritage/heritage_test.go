@@ -18,7 +18,6 @@ func Test_ValidateHeritage(t *testing.T) {
 		args args
 		want bool
 	}
-	// TODO
 	tests := []testArgs{
 		{
 			name: "Strict check",
