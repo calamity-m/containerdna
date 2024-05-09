@@ -136,6 +136,30 @@ func Test_validateChildParentsImageInvalidCases(t *testing.T) {
 			},
 			want: false,
 		},
+		{
+			name: "Relaxed disabled; should be invalid as one parent matches",
+			args: args{
+				relaxed: false,
+				child: containers.Image{
+					Layers: []types.BlobInfo{{Digest: "LAYER1"}, {Digest: "LAYER2"}, {Digest: "LAYER3"}},
+					Name:   "",
+					Err:    nil,
+				},
+				parents: []containers.Image{
+					{
+						Layers: []types.BlobInfo{{Digest: "LAYER1"}, {Digest: "LAYER2"}},
+						Name:   "",
+						Err:    nil,
+					},
+					{
+						Layers: []types.BlobInfo{{Digest: "LAYER1"}, {Digest: "LAYER3"}},
+						Name:   "",
+						Err:    nil,
+					},
+				},
+			},
+			want: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -180,30 +204,6 @@ func Test_validateChildParentsImageValidCases(t *testing.T) {
 				},
 			},
 			want: true,
-		},
-		{
-			name: "Relaxed disabled; should be invalid as one parent matches",
-			args: args{
-				relaxed: false,
-				child: containers.Image{
-					Layers: []types.BlobInfo{{Digest: "LAYER1"}, {Digest: "LAYER2"}, {Digest: "LAYER3"}},
-					Name:   "",
-					Err:    nil,
-				},
-				parents: []containers.Image{
-					{
-						Layers: []types.BlobInfo{{Digest: "LAYER1"}, {Digest: "LAYER2"}},
-						Name:   "",
-						Err:    nil,
-					},
-					{
-						Layers: []types.BlobInfo{{Digest: "LAYER1"}, {Digest: "LAYER3"}},
-						Name:   "",
-						Err:    nil,
-					},
-				},
-			},
-			want: false,
 		},
 	}
 	for _, tt := range tests {
